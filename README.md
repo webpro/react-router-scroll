@@ -29,7 +29,7 @@ ReactDOM.render(
 ### Installation
 
 ```shell
-$ yarn add ytase/react-router-scroll
+$ yarn add ytase/react-router-scroll#build
 ```
 
 ### Basic usage
