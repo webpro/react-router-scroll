@@ -1,5 +1,5 @@
 import React from 'react';
-import { IndexRoute, Route } from 'react-router';
+import { Route } from 'react-router-dom';
 
 function Page1() {
   return (
@@ -14,24 +14,15 @@ function Page2() {
 }
 
 export const syncRoutes = [
-  <Route path="/" component={Page1} />,
-  <Route path="/page2" component={Page2} />,
-];
-
-function asyncOnEnter(nextState, cb) {
-  setTimeout(cb, 100);
-}
-
-export const asyncRoutes = [
-  <Route path="/" onEnter={asyncOnEnter} component={Page1} />,
-  <Route path="/page2" onEnter={asyncOnEnter} component={Page2} />,
+  <Route path="/" exact key="page1" component={Page1} />,
+  <Route path="/page2" key="page2" component={Page2} />,
 ];
 
 export function createElementRoutes(Page) {
   return (
-    <Route path="/" component={Page}>
-      <IndexRoute />
-      <Route path="other" />
-    </Route>
+    <Page>
+      <Route exact path="/" />
+      <Route path="/other" />
+    </Page>
   );
 }

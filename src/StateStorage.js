@@ -1,22 +1,20 @@
-import { readState, saveState } from 'history/lib/DOMStateStorage';
-
 const STATE_KEY_PREFIX = '@@scroll|';
 
-export default class StateStorage {
-  constructor(router) {
-    this.getFallbackLocationKey = router.createPath;
-  }
-
+export default class SessionStorage {
   read(location, key) {
-    return readState(this.getStateKey(location, key));
+    const stateKey = this.getStateKey(location, key);
+    const value = sessionStorage.getItem(stateKey);
+    return JSON.parse(value);
   }
 
   save(location, key, value) {
-    saveState(this.getStateKey(location, key), value);
+    const stateKey = this.getStateKey(location, key);
+    const storedValue = JSON.stringify(value);
+    sessionStorage.setItem(stateKey, storedValue);
   }
 
   getStateKey(location, key) {
-    const locationKey = location.key || this.getFallbackLocationKey(location);
+    const locationKey = location.key;
     const stateKeyBase = `${STATE_KEY_PREFIX}${locationKey}`;
     return key == null ? stateKeyBase : `${stateKeyBase}|${key}`;
   }

@@ -1,17 +1,14 @@
 import scrollTop from 'dom-helpers/query/scrollTop';
-import createBrowserHistory from 'history/lib/createBrowserHistory';
-import createHashHistory from 'history/lib/createHashHistory';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { applyRouterMiddleware, Router, useRouterHistory } from 'react-router';
+import { MemoryRouter } from 'react-router-dom';
 
-import useScroll from '../src/useScroll';
 import ScrollContainer from '../src/ScrollContainer';
+import ScrollBehaviorContext from '../src/ScrollBehaviorContext';
 
 import { ScrollableComponent } from './components';
-import { createHashHistoryWithoutKey } from './histories';
-import { createElementRoutes } from './routes';
-import run from './run';
+// import { createElementRoutes } from './routes';
+import renderTestSequence from './stepping';
 
 describe('<ScrollContainer>', () => {
   let container;
@@ -30,16 +27,8 @@ describe('<ScrollContainer>', () => {
 
   // Create a new history every time to avoid old state.
   [
-    createBrowserHistory,
-    createHashHistory,
-    createHashHistoryWithoutKey,
+    MemoryRouter,
   ].forEach((createHistory) => {
-    let history;
-
-    beforeEach(() => {
-      history = useRouterHistory(createHistory)();
-    });
-
     describe(createHistory.name, () => {
       it('should have correct default behavior', (done) => {
         const Page = () => (
@@ -48,12 +37,18 @@ describe('<ScrollContainer>', () => {
           </ScrollContainer>
         );
 
+        const App = () => (
+          <ScrollBehaviorContext>
+            <Page />
+          </ScrollBehaviorContext>
+        );
+
         const steps = [
-          () => {
+          ({ history }) => {
             scrollTop(container.firstChild, 10000);
             history.push('/other');
           },
-          () => {
+          ({ history }) => {
             expect(scrollTop(container.firstChild)).to.equal(0);
             history.goBack();
           },
@@ -63,15 +58,11 @@ describe('<ScrollContainer>', () => {
           },
         ];
 
-        ReactDOM.render(
-          <Router
-            history={history}
-            routes={createElementRoutes(Page)}
-            render={applyRouterMiddleware(useScroll(() => false))}
-            onUpdate={run(steps)}
-          />,
-          container,
-        );
+        renderTestSequence({
+          subject: App,
+          steps,
+          target: container,
+        });
       });
 
       it('should have support custom behavior', (done) => {
@@ -84,12 +75,18 @@ describe('<ScrollContainer>', () => {
           </ScrollContainer>
         );
 
+        const App = () => (
+          <ScrollBehaviorContext>
+            <Page />
+          </ScrollBehaviorContext>
+        );
+
         const steps = [
-          () => {
+          ({ history }) => {
             scrollTop(container.firstChild, 10000);
             history.push('/other');
           },
-          () => {
+          ({ history }) => {
             expect(scrollTop(container.firstChild)).to.equal(5000);
             history.goBack();
           },
@@ -99,15 +96,11 @@ describe('<ScrollContainer>', () => {
           },
         ];
 
-        ReactDOM.render(
-          <Router
-            history={history}
-            routes={createElementRoutes(Page)}
-            render={applyRouterMiddleware(useScroll(() => false))}
-            onUpdate={run(steps)}
-          />,
-          container,
-        );
+        renderTestSequence({
+          subject: App,
+          steps,
+          target: container,
+        });
       });
     });
   });

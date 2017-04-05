@@ -1,17 +1,15 @@
 import scrollLeft from 'dom-helpers/query/scrollLeft';
 import scrollTop from 'dom-helpers/query/scrollTop';
-import createBrowserHistory from 'history/lib/createBrowserHistory';
-import createHashHistory from 'history/lib/createHashHistory';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { applyRouterMiddleware, Router, useRouterHistory } from 'react-router';
+import { Switch, MemoryRouter } from 'react-router-dom';
 
 import StateStorage from '../src/StateStorage';
-import useScroll from '../src/useScroll';
+import ScrollContext from '../src/ScrollBehaviorContext';
 
-import { createHashHistoryWithoutKey } from './histories';
-import { asyncRoutes, syncRoutes } from './routes';
-import run, { delay } from './run';
+import { syncRoutes } from './routes';
+import { delay } from './run';
+import renderTestSequence from './stepping';
 
 describe('useScroll', () => {
   let container;
@@ -30,29 +28,23 @@ describe('useScroll', () => {
 
   // Create a new history every time to avoid old state.
   [
-    createBrowserHistory,
-    createHashHistory,
-    createHashHistoryWithoutKey,
+    MemoryRouter,
   ].forEach((createHistory) => {
-    let history;
-
     beforeEach(() => {
-      history = useRouterHistory(createHistory)();
     });
 
     describe(createHistory.name, () => {
       [
         ['syncRoutes', syncRoutes],
-        ['asyncRoutes', asyncRoutes],
-      ].forEach(([routesName, routes]) => {
+      ].forEach(([routesName]) => {
         describe(routesName, () => {
           it('should have correct default behavior', (done) => {
             const steps = [
-              () => {
+              ({ history }) => {
                 scrollTop(window, 15000);
                 delay(() => history.push('/page2'));
               },
-              () => {
+              ({ history }) => {
                 expect(scrollTop(window)).to.equal(0);
                 history.goBack();
               },
@@ -62,15 +54,17 @@ describe('useScroll', () => {
               },
             ];
 
-            ReactDOM.render(
-              <Router
-                history={history}
-                routes={routes}
-                render={applyRouterMiddleware(useScroll())}
-                onUpdate={run(steps)}
-              />,
-              container
-            );
+            const App = () => (<ScrollContext>
+              <Switch>
+                { syncRoutes }
+              </Switch>
+            </ScrollContext>);
+
+            renderTestSequence({
+              subject: App,
+              steps,
+              target: container,
+            });
           });
 
           it('should support custom behavior', (done) => {
@@ -134,15 +128,19 @@ describe('useScroll', () => {
               },
             ];
 
-            ReactDOM.render(
-              <Router
-                history={history}
-                routes={routes}
-                render={applyRouterMiddleware(useScroll(shouldUpdateScroll))}
-                onUpdate={run(steps)}
-              />,
-              container,
-            );
+            const App = () => (<ScrollContext
+              shouldUpdateScroll={shouldUpdateScroll}
+            >
+              <Switch>
+                { syncRoutes }
+              </Switch>
+            </ScrollContext>);
+
+            renderTestSequence({
+              subject: App,
+              steps,
+              target: container,
+            });
           });
         });
       });
