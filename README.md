@@ -1,23 +1,25 @@
-# react-router-scroll [![Travis][build-badge]][build] [![npm][npm-badge]][npm]
+# react-router-scroll for React-router-dom v4
 
 [React Router](https://github.com/reactjs/react-router) scroll management.
 
 react-router-scroll is a React Router middleware that adds scroll management using [scroll-behavior](https://github.com/taion/scroll-behavior). By default, the middleware adds browser-style scroll behavior, but you can customize it to scroll however you want on route transitions.
 
+This is a fork of the original React Router scroll made to support Reat Router v4. Currently all the original features should be working but it is still in early development, tests have not been completely updated yet and there are probably bugs to be encountered. Do not hesitate to signal them, or een fix them through pull requests.
+
 ## Usage
 
 ```js
-import { applyRouterMiddleware, browserHistory, Router } from 'react-router';
-import { useScroll } from 'react-router-scroll';
+import { BrowserRouter } from 'react-router-dom';
+import { ScrollContext } from 'react-router-scroll';
 
 /* ... */
 
 ReactDOM.render(
-  <Router
-    history={browserHistory}
-    routes={routes}
-    render={applyRouterMiddleware(useScroll())}
-  />,
+  <BrowserRouter>
+    <ScrollContext>
+      <MyApp />
+    </ ScrollContext>
+  </ BrowserRouter>,
   container
 );
 ```
@@ -27,30 +29,29 @@ ReactDOM.render(
 ### Installation
 
 ```shell
-$ npm i -S react react-dom react-router
-$ npm i -S react-router-scroll
+$ yarn add ytase/react-router-scroll
 ```
 
 ### Basic usage
 
-Apply the `useScroll` router middleware using `applyRouterMiddleware`, as in the example above.
+Use the `ScrollContext` wrapper as in the example above. `ScrollContext` Should always have only one child, same as all the `Router` components.
 
 ### Custom scroll behavior
 
-You can provide a custom `shouldUpdateScroll` callback as an argument to `useScroll`. This callback is called with the previous and the current router props.
+You can provide a custom `shouldUpdateScroll` as a property of `ScrollContext`. This function is called with the previous and the current router props.
 
-The callback can return:
+The function can return:
 
 - a falsy value to suppress updating the scroll position
 - a position array of `x` and `y`, such as `[0, 100]`, to scroll to that position
 - a truthy value to emulate the browser default scroll behavior
 
 ```js
-useScroll((prevRouterProps, { location }) => (
+shouldUpdateScroll = (prevRouterProps, { location }) => (
   prevRouterProps && location.pathname !== prevRouterProps.location.pathname
-));
+);
 
-useScroll((prevRouterProps, { routes }) => {
+shouldUpdateScroll = (prevRouterProps, { routes }) => {
   if (routes.some(route => route.ignoreScrollBehavior)) {
     return false;
   }
@@ -60,7 +61,7 @@ useScroll((prevRouterProps, { routes }) => {
   }
 
   return true;
-});
+};
 ```
 
 ### Scrolling elements other than `window`
@@ -88,20 +89,6 @@ function Page() {
 
 ### Notes
 
-#### Minimizing bundle size
+#### Server side rendering
 
-If you are not using `<ScrollContainer>`, you can reduce your bundle size by importing the `useScroll` module directly.
-
-```js
-import useScroll from 'react-router-scroll/lib/useScroll';
-```
-
-#### Server rendering
-
-Do not apply the `useScroll` middleware when rendering on a server. You may use `<ScrollContainer>` in server-rendered components; it will do nothing when rendering on a server.
-
-[build-badge]: https://img.shields.io/travis/taion/react-router-scroll/master.svg
-[build]: https://travis-ci.org/taion/react-router-scroll
-
-[npm-badge]: https://img.shields.io/npm/v/react-router-scroll.svg
-[npm]: https://www.npmjs.org/package/react-router-scroll
+Both `<ScrollContainer>`  and `<ScrollContext>` are fine to use in server side rendering context. They just renturn their child without changing them in any way.
