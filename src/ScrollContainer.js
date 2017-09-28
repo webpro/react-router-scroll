@@ -1,21 +1,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
 import warning from 'warning';
 
-const propTypes = {
-  scrollKey: React.PropTypes.string.isRequired,
-  shouldUpdateScroll: React.PropTypes.func,
-  children: React.PropTypes.element.isRequired,
-};
-
-const contextTypes = {
-  // This is necessary when rendering on the client. However, when rendering on
-  // the server, this container will do nothing, and thus does not require the
-  // scroll behavior context.
-  scrollBehavior: React.PropTypes.object,
-};
-
 class ScrollContainer extends React.Component {
+
+  static propTypes = {
+    scrollKey: PropTypes.string.isRequired,
+    shouldUpdateScroll: PropTypes.func,
+    children: PropTypes.element.isRequired,
+  };
+
+  static contextTypes = {
+    // This is necessary when rendering on the client. However, when rendering on
+    // the server, this container will do nothing, and thus does not require the
+    // scroll behavior context.
+    scrollBehavior: PropTypes.object,
+  };
+
   constructor(props, context) {
     super(props, context);
 
@@ -79,8 +81,5 @@ class ScrollContainer extends React.Component {
     return this.props.children;
   }
 }
-
-ScrollContainer.propTypes = propTypes;
-ScrollContainer.contextTypes = contextTypes;
 
 export default ScrollContainer;

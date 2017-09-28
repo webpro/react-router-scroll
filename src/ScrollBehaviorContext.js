@@ -1,21 +1,23 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 import ScrollBehavior from 'scroll-behavior';
+import PropTypes from 'prop-types';
 
 import SessionStorage from './StateStorage';
 
-const propTypes = {
-  shouldUpdateScroll: React.PropTypes.func,
-  children: React.PropTypes.element.isRequired,
-  location: React.PropTypes.object.isRequired,
-  history: React.PropTypes.object.isRequired,
-};
-
-const childContextTypes = {
-  scrollBehavior: React.PropTypes.object.isRequired,
-};
-
 class ScrollContext extends React.Component {
+
+  static propTypes = {
+    shouldUpdateScroll: PropTypes.func,
+    children: PropTypes.element.isRequired,
+    location: PropTypes.object.isRequired,
+    history: PropTypes.object.isRequired,
+  };
+
+  static childContextTypes = {
+    scrollBehavior: PropTypes.object.isRequired,
+  };
+
   constructor(props, context) {
     super(props, context);
 
@@ -88,8 +90,5 @@ class ScrollContext extends React.Component {
     return React.Children.only(this.props.children);
   }
 }
-
-ScrollContext.propTypes = propTypes;
-ScrollContext.childContextTypes = childContextTypes;
 
 export default withRouter(ScrollContext);

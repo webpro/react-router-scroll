@@ -1,6 +1,7 @@
 import { render, unmountComponentAtNode } from 'react-dom';
 import React from 'react';
 import { Route, MemoryRouter } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
 // a way to render any part of your app inside a MemoryRouter
 // you pass it a list of steps to execute when the location
@@ -39,7 +40,7 @@ const renderTestSequence = ({
   }
 
   Assert.propTypes = {
-    children: React.PropTypes.element.isRequired,
+    children: PropTypes.element.isRequired,
   };
 
   const Test = () => (<MemoryRouter
